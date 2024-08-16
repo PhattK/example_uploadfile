@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File Upload</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <input type="file" id="fileInput" />
+    <button onclick="uploadFile()">Upload</button>
+    <button onclick="cancelUpload()">Cancle</button>
+    <progress id="uploadProgress" max="100" value="0" style="width:100%; margin-top: 10px;"></progress>
+    
+    <script>
+        let currentSource
+        const uploadFile = async () => {
+            const fileInput = document.getElementById('fileInput')
+            const selectedFile = fileInput.files[0]
+            //validateFileSize
+            // if (selectedFile.size > 1024*1024*2) {
+            //     alert('Can not upload')
+            //     return false
+            // }
+            //validateFileType
+            // if (selectedFile.type !== 'image/png') {
+            //     alert('Can not upload this file type')
+            //     return false
+            // }
+
+            if (!fileInput.files.length) {
+                return alert('Please choose a file to upload')
+            }
+
+            const formData = new FormData()
+            formData.append('test', selectedFile)
+
+            const source = axios.CancelToken.source()
+            currentSource = source
+            
+            try {
+                const response = await axios
+                    .post('http://localhost:8000/upload', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                        onUploadProgress: function (progressValue) {
+                            //console.log(progressValue)
+                            uploadProgress.value = progressValue.progress*100
+                        },
+                        cancelToken: source.token,
+                    })
+                console.log('Server',response.data)
+                alert('Upload Complete')
+                uploadProgress.value = 0
+            } catch (error) {
+                if (axios.isCancel(error)) {
+                    console.log('Upload was cancelled')
+                } else {
+                    alert('Error uploading file')
+                }
+            }
+        }
+
+        const cancelUpload = () => {
+            if (currentSource) {
+            alert('cancel !')
+            currentSource.cancel('User closed browser or navigated away')
+            }
+        }
+    </script>
+  </body>
+</html>
