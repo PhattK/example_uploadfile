@@ -1,4 +1,4 @@
-# sample_upload with Multer
+# example_upload with Multer
 Implementing an upload process using Express.js with the following details:
 
 - Uploading files from the frontend to the backend
